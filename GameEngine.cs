@@ -22,6 +22,15 @@ namespace GADE_POE_HEENA_JANA
             Position targetPos = GetTargetPosition(
                 CurrentLevel.Hero.Position, direction);
 
+            // Prevent moving outside the grid.
+            if (targetPos.X < 0 ||
+                targetPos.X >= CurrentLevel.Width ||
+                targetPos.Y < 0 ||
+                targetPos.Y >= CurrentLevel.Height)
+            {
+                return;
+            }
+
             Tile targetTile =
                 CurrentLevel.Grid[targetPos.X, targetPos.Y];
 
@@ -46,9 +55,28 @@ namespace GADE_POE_HEENA_JANA
                 {
                     RemoveEnemy(enemy);
                 }
+
+                // Unlock the exit if all enemies are defeated.
+                CurrentLevel.UpdateExit();
+            }
+            else if (targetTile is ExitTile exit)
+            {
+                if (!exit.IsLocked)
+                {
+                    // The exit is unlocked.
+                    // Next-level progression must be handled here
+                    // if your project implements multiple levels.
+                    return;
+                }
+
+                // The exit is locked, so the hero cannot enter.
+                return;
             }
 
             ProcessEnemyTurns();
+
+            // Also check after enemy turns.
+            CurrentLevel.UpdateExit();
         }
 
         private void ProcessEnemyTurns()
@@ -67,7 +95,6 @@ namespace GADE_POE_HEENA_JANA
                     continue;
                 }
 
-                // Attack all characters selected by this enemy.
                 CharacterTile[] targets = enemy.GetTargets();
 
                 if (targets.Length > 0)
@@ -82,7 +109,6 @@ namespace GADE_POE_HEENA_JANA
                 }
                 else
                 {
-                    // Move if this enemy type has a valid move.
                     Tile nextTile;
 
                     if (enemy.GetMove(out nextTile) &&
@@ -94,7 +120,6 @@ namespace GADE_POE_HEENA_JANA
                     }
                 }
 
-                // Remove enemies defeated during the turn.
                 foreach (EnemyTile other in
                     CurrentLevel.Enemies.ToArray())
                 {
