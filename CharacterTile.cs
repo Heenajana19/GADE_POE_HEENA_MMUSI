@@ -1,47 +1,29 @@
+
+using System;
+
 namespace GADE_POE_HEENA_JANA
 {
     public abstract class CharacterTile : Tile
     {
-        public int CurrentHealth { get; set; }
-        public int MaxHealth { get; protected set; }
-        public int AttackPower { get; protected set; }
+        protected int hitPoints;
+        protected int maxHitPoints;
+        protected int attackPower;
 
-        protected CharacterTile(Position position, int health, int attackPower)
+        protected Tile[] vision;
+
+        public CharacterTile(Position position, int hitPoints, int attackPower)
             : base(position)
         {
-            MaxHealth = health;
-            CurrentHealth = health;
-            AttackPower = attackPower;
+            this.hitPoints = hitPoints;
+            this.maxHitPoints = hitPoints;
+            this.attackPower = attackPower;
+
+            vision = new Tile[4];
         }
 
-        public bool IsDead => CurrentHealth <= 0;
-
-        public virtual void TakeDamage(int damage)
+        public void UpdateVision(Level level)
         {
-            CurrentHealth -= damage;
-
-            if (CurrentHealth < 0)
-            {
-                CurrentHealth = 0;
-            }
-        }
-
-        public virtual void Attack(CharacterTile target)
-        {
-            if (target != null && !target.IsDead)
-            {
-                target.TakeDamage(this.AttackPower);
-            }
-        }
-
-        public virtual void Heal(int amount)
-        {
-            CurrentHealth += amount;
-
-            if (CurrentHealth > MaxHealth)
-            {
-                CurrentHealth = MaxHealth;
-            }
+            // The character's vision will be updated here.
         }
     }
 }
