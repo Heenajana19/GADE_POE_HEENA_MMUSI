@@ -1,6 +1,6 @@
-
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GADE_POE_HEENA_JANA
 {
@@ -8,7 +8,6 @@ namespace GADE_POE_HEENA_JANA
     {
         public Tile[,] Grid { get; private set; }
 
-        // Property exposing the level's 2D tile array.
         public Tile[,] Tiles
         {
             get { return Grid; }
@@ -18,6 +17,7 @@ namespace GADE_POE_HEENA_JANA
         public int Height { get; private set; }
 
         public HeroTile Hero { get; private set; }
+        public ExitTile Exit { get; private set; }
 
         public List<EnemyTile> Enemies { get; private set; }
         public List<GruntTile> Grunts { get; private set; }
@@ -41,7 +41,6 @@ namespace GADE_POE_HEENA_JANA
 
         private void GenerateLevel()
         {
-            // Create the walls and empty tiles.
             for (int x = 0; x < Width; x++)
             {
                 for (int y = 0; y < Height; y++)
@@ -60,11 +59,16 @@ namespace GADE_POE_HEENA_JANA
                 }
             }
 
-            // Spawn the hero.
             Position heroPos = GetRandomEmptyPosition();
 
             Hero = new HeroTile(heroPos);
             Grid[heroPos.X, heroPos.Y] = Hero;
+
+            // Create a locked exit.
+            Position exitPos = GetRandomEmptyPosition();
+
+            Exit = new ExitTile(exitPos);
+            Grid[exitPos.X, exitPos.Y] = Exit;
 
             // Spawn 2-3 enemies.
             int enemyCount = random.Next(2, 4);
@@ -73,9 +77,9 @@ namespace GADE_POE_HEENA_JANA
             {
                 Position enemyPos = GetRandomEmptyPosition();
 
-                EnemyTile enemy = (EnemyTile)CreateTile(
-                    Tile.TileType.Enemy, enemyPos);
+                EnemyTile enemy = CreateEnemyTile(enemyPos);
 
+                Grid[enemyPos.X, enemyPos.Y] = enemy;
                 Enemies.Add(enemy);
 
                 GruntTile grunt = enemy as GruntTile;
@@ -94,11 +98,13 @@ namespace GADE_POE_HEENA_JANA
                 Position pickupPos = GetRandomEmptyPosition();
 
                 HealthPickupTile pickup =
-                    (HealthPickupTile)CreateTile(
-                        Tile.TileType.HealthPickup, pickupPos);
+                    new HealthPickupTile(pickupPos);
 
+                Grid[pickupPos.X, pickupPos.Y] = pickup;
                 HealthPickups.Add(pickup);
             }
+
+            UpdateExit();
         }
 
         private EnemyTile CreateEnemyTile(Position position)
@@ -117,55 +123,6 @@ namespace GADE_POE_HEENA_JANA
             {
                 return new TyrantTile(position, this);
             }
-        }
-
-        private Tile CreateTile(
-            Tile.TileType type, Position position)
-        {
-            Tile createdTile;
-
-            switch (type)
-            {
-                case Tile.TileType.Hero:
-                    createdTile = new HeroTile(position);
-                    break;
-
-                case Tile.TileType.Wall:
-                    createdTile = new WallTile(position);
-                    break;
-
-                case Tile.TileType.Empty:
-                    createdTile = new EmptyTile(position);
-                    break;
-
-                case Tile.TileType.HealthPickup:
-                    createdTile = new HealthPickupTile(position);
-                    break;
-
-                case Tile.TileType.Grunt:
-                    createdTile = new GruntTile(position, this);
-                    break;
-
-                case Tile.TileType.Warlock:
-                    createdTile = new WarlockTile(position, this);
-                    break;
-
-                case Tile.TileType.Tyrant:
-                    createdTile = new TyrantTile(position, this);
-                    break;
-
-                case Tile.TileType.Enemy:
-                    createdTile = CreateEnemyTile(position);
-                    break;
-
-                default:
-                    createdTile = new EmptyTile(position);
-                    break;
-            }
-
-            Grid[position.X, position.Y] = createdTile;
-
-            return createdTile;
         }
 
         public Position GetRandomEmptyPosition()
@@ -194,8 +151,18 @@ namespace GADE_POE_HEENA_JANA
                 new EmptyTile(tile.Position);
 
             tile.Position = newPos;
-
             Grid[newPos.X, newPos.Y] = tile;
+        }
+
+        public void UpdateExit()
+        {
+            bool allEnemiesDefeated =
+                Enemies.All(enemy => enemy.IsDead);
+
+            if (allEnemiesDefeated && Exit != null)
+            {
+                Exit.Unlock();
+            }
         }
     }
 }
