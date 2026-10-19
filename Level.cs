@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 
@@ -6,8 +7,16 @@ namespace GADE_POE_HEENA_JANA
     public class Level
     {
         public Tile[,] Grid { get; private set; }
+
+        // Property exposing the level's 2D tile array.
+        public Tile[,] Tiles
+        {
+            get { return Grid; }
+        }
+
         public int Width { get; private set; }
         public int Height { get; private set; }
+
         public HeroTile Hero { get; private set; }
 
         public List<EnemyTile> Enemies { get; private set; }
@@ -57,7 +66,7 @@ namespace GADE_POE_HEENA_JANA
             Hero = new HeroTile(heroPos);
             Grid[heroPos.X, heroPos.Y] = Hero;
 
-            // Spawn 2-3 randomly selected enemy types.
+            // Spawn 2-3 enemies.
             int enemyCount = random.Next(2, 4);
 
             for (int i = 0; i < enemyCount; i++)
