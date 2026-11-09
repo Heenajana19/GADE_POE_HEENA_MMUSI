@@ -1,19 +1,18 @@
+using System;
+
 namespace GADE_POE_HEENA_JANA
 {
+    [Serializable]
     public class HeroTile : CharacterTile
     {
-        public HeroTile(Position position) : base(position, 40, 5)
+        public HeroTile(Position position)
+            : base(position, 40, 5)
         {
         }
 
-        public override TileType GetTileType()
+        public override char Display
         {
-            return TileType.Hero;
-        }
-
-        public override string ToString()
-        {
-            return IsDead ? "x" : "▼";
+            get { return IsDead ? 'x' : '▼'; }
         }
     }
 }
