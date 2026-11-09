@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace GADE_POE_HEENA_JANA
 {
+    [Serializable]
     public class TyrantTile : EnemyTile
     {
         public TyrantTile(Position position, Level level)
@@ -10,94 +11,83 @@ namespace GADE_POE_HEENA_JANA
         {
         }
 
-        public override Tile.TileType GetTileType()
+        public override char Display
         {
-            return Tile.TileType.Tyrant;
+            get { return IsDead ? 'x' : '§'; }
         }
 
         public override bool GetMove(out Tile tile)
         {
-            int dx = Math.Sign(
-                Level.Hero.Position.X - Position.X);
+            tile = null;
 
-            int dy = Math.Sign(
-                Level.Hero.Position.Y - Position.Y);
+            if (IsDead)
+            {
+                return false;
+            }
 
-            // Try moving horizontally towards the hero.
+            int dx = Math.Sign(level.Hero.X - X);
+            int dy = Math.Sign(level.Hero.Y - Y);
+
             if (dx != 0)
             {
-                int x = Position.X + dx;
-                int y = Position.Y;
+                Tile horizontal = level.GetTile(X + dx, Y);
 
-                if (Level.IsTileEmpty(new Position(x, y)))
+                if (horizontal is EmptyTile)
                 {
-                    tile = Level.Grid[x, y];
+                    tile = horizontal;
                     return true;
                 }
             }
 
-            // Try moving vertically towards the hero.
             if (dy != 0)
             {
-                int x = Position.X;
-                int y = Position.Y + dy;
+                Tile vertical = level.GetTile(X, Y + dy);
 
-                if (Level.IsTileEmpty(new Position(x, y)))
+                if (vertical is EmptyTile)
                 {
-                    tile = Level.Grid[x, y];
+                    tile = vertical;
                     return true;
                 }
             }
 
-            tile = null;
             return false;
         }
 
         public override CharacterTile[] GetTargets()
         {
-            List<CharacterTile> targets =
-                new List<CharacterTile>();
+            List<CharacterTile> targets = new List<CharacterTile>();
 
-            for (int x = 0; x < Level.Width; x++)
+            if (IsDead)
             {
-                if (x == Position.X)
-                {
-                    continue;
-                }
-
-                CharacterTile character =
-                    Level.Grid[x, Position.Y] as CharacterTile;
-
-                if (character != null &&
-                    !character.IsDead)
-                {
-                    targets.Add(character);
-                }
+                return targets.ToArray();
             }
 
-            for (int y = 0; y < Level.Height; y++)
+            for (int x = 0; x < level.Width; x++)
             {
-                if (y == Position.Y)
-                {
-                    continue;
-                }
+                AddTarget(level.GetTile(x, Y), targets);
+            }
 
-                CharacterTile character =
-                    Level.Grid[Position.X, y] as CharacterTile;
-
-                if (character != null &&
-                    !character.IsDead)
-                {
-                    targets.Add(character);
-                }
+            for (int y = 0; y < level.Height; y++)
+            {
+                AddTarget(level.GetTile(X, y), targets);
             }
 
             return targets.ToArray();
         }
 
-        public override string ToString()
+        private void AddTarget(
+            Tile tile,
+            List<CharacterTile> targets)
         {
-            return IsDead ? "x" : "T";
+            CharacterTile target = tile as CharacterTile;
+
+            if (target != null &&
+                target != this &&
+                !target.IsDead &&
+                !targets.Contains(target))
+            {
+                targets.Add(target);
+            }
         }
     }
 }
