@@ -83,3 +83,75 @@ namespace GADE_POE_HEENA_JANA
         }
     }
 }
+
+using System;
+using System.Collections.Generic;
+
+namespace GADE_POE_HEENA_JANA
+{
+    [Serializable]
+    public class GruntTile : EnemyTile
+    {
+        private static readonly Random random = new Random();
+
+        public GruntTile(Position position, Level level)
+            : base(position, level, 10, 1)
+        {
+        }
+
+        public override char Display
+        {
+            get { return IsDead ? 'x' : 'Ϫ'; }
+        }
+
+        public override bool GetMove(out Tile tile)
+        {
+            tile = null;
+
+            if (IsDead)
+            {
+                return false;
+            }
+
+            UpdateVision(level);
+
+            List<Tile> possibleMoves = new List<Tile>();
+
+            foreach (Tile visibleTile in Vision)
+            {
+                if (visibleTile is EmptyTile)
+                {
+                    possibleMoves.Add(visibleTile);
+                }
+            }
+
+            if (possibleMoves.Count == 0)
+            {
+                return false;
+            }
+
+            tile = possibleMoves[random.Next(possibleMoves.Count)];
+            return true;
+        }
+
+        public override CharacterTile[] GetTargets()
+        {
+            if (IsDead)
+            {
+                return new CharacterTile[0];
+            }
+
+            UpdateVision(level);
+
+            foreach (Tile visibleTile in Vision)
+            {
+                if (visibleTile is HeroTile hero && !hero.IsDead)
+                {
+                    return new CharacterTile[] { hero };
+                }
+            }
+
+            return new CharacterTile[0];
+        }
+    }
+}
