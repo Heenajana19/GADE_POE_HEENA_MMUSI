@@ -1,23 +1,22 @@
+using System;
+
 namespace GADE_POE_HEENA_JANA
 {
-    public class HealthPickupTile : Tile
+    [Serializable]
+    public class HealthPickupTile : PickupTile
     {
-        public int HealAmount { get; private set; }
-
-        public HealthPickupTile(Position position, int healAmount = 10)
-            : base(position)
+        public HealthPickupTile(Position position) : base(position)
         {
-            HealAmount = healAmount;
         }
 
-        public override TileType GetTileType()
+        public override char Display
         {
-            return TileType.HealthPickup;
+            get { return '+'; }
         }
 
-        public override string ToString()
+        public override void ApplyEffect(CharacterTile character)
         {
-            return "+";
+            character.Heal(10);
         }
     }
 }
