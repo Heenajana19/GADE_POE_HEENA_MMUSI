@@ -1,27 +1,50 @@
+using System;
+
 namespace GADE_POE_HEENA_JANA
 {
+    [Serializable]
     public abstract class Tile
     {
-        public Position Position { get; set; }
+        private Position position;
 
         public enum TileType
         {
-            Hero,
-            Wall,
             Empty,
+            Wall,
+            Hero,
             Exit,
-            Grunt,
-            HealthPickup,
             Enemy,
-            Warlock,
-            Tyrant
+            Pickup
         }
+
+        public Position Position
+        {
+            get { return position; }
+            set { position = value; }
+        }
+
+        public int X
+        {
+            get { return position.X; }
+            set { position.X = value; }
+        }
+
+        public int Y
+        {
+            get { return position.Y; }
+            set { position.Y = value; }
+        }
+
+        public abstract char Display { get; }
 
         protected Tile(Position position)
         {
-            Position = position;
+            this.position = position;
         }
 
-        public abstract TileType GetTileType();
+        public override string ToString()
+        {
+            return Display.ToString();
+        }
     }
 }
