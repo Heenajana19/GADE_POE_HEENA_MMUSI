@@ -3,15 +3,22 @@ using System;
 namespace GADE_POE_HEENA_JANA
 {
     [Serializable]
-    public class EmptyTile : Tile
+    public abstract class EnemyTile : CharacterTile
     {
-        public EmptyTile(Position position) : base(position)
+        protected Level level;
+
+        protected EnemyTile(
+            Position position,
+            Level level,
+            int hitPoints,
+            int attackPower)
+            : base(position, hitPoints, attackPower)
         {
+            this.level = level;
         }
 
-        public override char Display
-        {
-            get { return '.'; }
-        }
+        public abstract bool GetMove(out Tile tile);
+
+        public abstract CharacterTile[] GetTargets();
     }
 }
