@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 
 namespace GADE_POE_HEENA_JANA
 {
+    [Serializable]
     public class WarlockTile : EnemyTile
     {
         public WarlockTile(Position position, Level level)
@@ -9,9 +11,9 @@ namespace GADE_POE_HEENA_JANA
         {
         }
 
-        public override Tile.TileType GetTileType()
+        public override char Display
         {
-            return Tile.TileType.Warlock;
+            get { return IsDead ? 'x' : 'ᐂ'; }
         }
 
         public override bool GetMove(out Tile tile)
@@ -22,8 +24,12 @@ namespace GADE_POE_HEENA_JANA
 
         public override CharacterTile[] GetTargets()
         {
-            List<CharacterTile> targets =
-                new List<CharacterTile>();
+            List<CharacterTile> targets = new List<CharacterTile>();
+
+            if (IsDead)
+            {
+                return targets.ToArray();
+            }
 
             for (int dx = -1; dx <= 1; dx++)
             {
@@ -34,32 +40,17 @@ namespace GADE_POE_HEENA_JANA
                         continue;
                     }
 
-                    int x = Position.X + dx;
-                    int y = Position.Y + dy;
+                    CharacterTile target =
+                        level.GetTile(X + dx, Y + dy) as CharacterTile;
 
-                    if (x < 0 || x >= Level.Width ||
-                        y < 0 || y >= Level.Height)
+                    if (target != null && !target.IsDead)
                     {
-                        continue;
-                    }
-
-                    CharacterTile character =
-                        Level.Grid[x, y] as CharacterTile;
-
-                    if (character != null &&
-                        !character.IsDead)
-                    {
-                        targets.Add(character);
+                        targets.Add(target);
                     }
                 }
             }
 
             return targets.ToArray();
-        }
-
-        public override string ToString()
-        {
-            return IsDead ? "x" : "W";
         }
     }
 }
