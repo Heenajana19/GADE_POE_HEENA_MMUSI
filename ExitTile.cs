@@ -40,3 +40,34 @@ namespace GADE_POE_HEENA_JANA
         }
     }
 }
+
+using System;
+
+namespace GADE_POE_HEENA_JANA
+{
+    [Serializable]
+    public class ExitTile : Tile
+    {
+        private bool isLocked;
+
+        public bool IsLocked
+        {
+            get { return isLocked; }
+        }
+
+        public ExitTile(Position position) : base(position)
+        {
+            isLocked = true;
+        }
+
+        public override char Display
+        {
+            get { return isLocked ? '▓' : '▒'; }
+        }
+
+        public void Unlock()
+        {
+            isLocked = false;
+        }
+    }
+}
